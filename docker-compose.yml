@@ -1,0 +1,58 @@
+version: "3"
+services:
+  mysql:
+    image: mysql:8.0.17
+    # container_name: mysql
+    environment:
+      #- TZ=Asia/Shanghai
+      MYSQL_DATABASE: 对应的数据库名称
+      MYSQL_ROOT_PASSWORD: 对应的数据库密码
+    volumes:
+      - ./data/mysql/data:/var/lib/mysql # 挂载数据库数据
+      - ./data/mysql/mysql.conf:/etc/mysql/my.cnf # 挂载配置文件
+      #- ./data//mysql/sql/init:/docker-entrypoint-initdb.d/ # 挂载数据初始化sql脚本
+      - ./data/mysql/mysql-files:/var/lib/mysql-files/
+    ports:
+      - 3306:3306
+    restart: always
+    #networks:
+    #  - wms_test
+  html:
+    image: kerwinleeyi/wms_html:dev.20210501.225556
+    # container_name: html
+    ports:
+      - "0.0.0.0:10001:80"
+    depends_on:
+      - api
+    volumes:
+      - ./data/html/nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./data/api/media:/web/dist/media
+    #networks:
+    #  - wms_test
+  api:
+    image: kerwinleeyi/wms_api:dev.20210507.111729
+    # container_name: api
+    environment:
+      #- TZ=Asia/Shanghai
+      MYSQL_HOST: wms_mysql
+      MYSQL_PORT: 3306
+    ports:
+      - 5000:5000
+    depends_on:
+      - mysql
+    volumes:
+      - ./wait-for-it.sh:/wait-for-it.sh
+      - ./data/api/sql.ini:/project/wms_api/config/sql.ini
+      - ./data/api/media:/project/wms_api/media
+      - ./data/api/logs:/project/wms_api/logs
+      - ./start.sh:/project/wms_api/scripts/start.sh
+    entrypoint: sh /project/wms_api/scripts/start.sh
+    # entrypoint: sh /wait-for-it.sh mysql:3306 -- sh /project/wms_api/scripts/start.sh
+    # entrypoint: sh /wait-for-it.sh mysql:3306 -- sleep infinity
+    #networks:
+    #  - wms_test
+#networks:
+#  default:
+#    external:
+#      name: wms_test
+
