@@ -5,8 +5,8 @@ services:
     # container_name: mysql
     environment:
       #- TZ=Asia/Shanghai
-      MYSQL_DATABASE: 对应的数据库名称
-      MYSQL_ROOT_PASSWORD: 对应的数据库密码
+      MYSQL_DATABASE: wms
+      MYSQL_ROOT_PASSWORD: 5881332
     volumes:
       - ./data/mysql/data:/var/lib/mysql # 挂载数据库数据
       - ./data/mysql/mysql.conf:/etc/mysql/my.cnf # 挂载配置文件
